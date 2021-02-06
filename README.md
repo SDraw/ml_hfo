@@ -1,2 +1,1 @@
-# ml_hfo
-Hand fingers overrider mod for VRChat
+# MelonLoader Hand Fingers Overrider
