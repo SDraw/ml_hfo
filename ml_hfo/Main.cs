@@ -129,7 +129,7 @@ namespace ml_hfo
                                 {
                                     if ((l_bufferIndex >= 0) && (l_bufferIndex <= 9))
                                     {
-                                        l_playableController.Method_Public_Boolean_Int32_Single_3(i, ms_fingersData[l_bufferIndex]); // Why the fuck float for all types???
+                                        l_playableController.Method_Public_Boolean_Int32_Single_1(i, ms_fingersData[l_bufferIndex]); // Why the fuck float for all types???
                                     }
                                 }
                                 continue;
@@ -141,7 +141,7 @@ namespace ml_hfo
                                 {
                                     if ((l_bufferIndex >= 0) && (l_bufferIndex <= 1))
                                     {
-                                        l_playableController.Method_Public_Boolean_Int32_Single_3(i, ms_handsPresent[l_bufferIndex] ? 1.0f : 0.0f); // Why the fuck float for all types???
+                                        l_playableController.Method_Public_Boolean_Int32_Single_1(i, ms_handsPresent[l_bufferIndex] ? 1.0f : 0.0f); // Why the fuck float for all types???
                                     }
                                 }
                                 continue;
