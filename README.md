@@ -1,8 +1,10 @@
 # Leap Motion Extension
 This mod allows you to use your Leap Motion controller for hands and fingers visual tracking.
 
+[![](.github/img_01.png)](https://youtu.be/ALDBcI9yCyM)
+
 # Installation
-* Get latest release.
+* Get [latest release](../../releases/latest).
 * Extract archive to VRChat folder.
 
 # Usage
@@ -25,7 +27,7 @@ Available settings im mods settings menu:
     * 0 - Left hand
     * 1 - Right hand
 * **Root point:** transformation root for hands position: 0 - player itself, 1 - player's head.
-* **RootOffsetY/RootOffsetZ:** transformation root offset. Values are represeting offset for avatar with height 1.0. After applied offsets transformation scales based on current avatar height.
+* **RootOffsetY/RootOffsetZ:** transformation root offset. Values are representing offset for avatar with height 1.0. After applied offsets transformation scales based on current avatar height.
 
 # Notes
 Usage of mods breaks ToS of VRChat and can lead to ban. Use at your own risk.
