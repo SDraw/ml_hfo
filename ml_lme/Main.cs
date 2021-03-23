@@ -104,7 +104,15 @@ namespace ml_lme
             if (m_enabled)
             {
                 // Use Leap Motion data
-                if (m_leapInitialized) LeapExtender.LeapGetHandsData(m_fingersDataPtr.AddrOfPinnedObject(), m_handsPresentPtr.AddrOfPinnedObject(), m_handPositionsPtr.AddrOfPinnedObject(), m_handRotationsPtr.AddrOfPinnedObject());
+                if (m_leapInitialized)
+                {
+                    if (LeapExtender.LeapGetHandsData(m_fingersDataPtr.AddrOfPinnedObject(), m_handsPresentPtr.AddrOfPinnedObject(), m_handPositionsPtr.AddrOfPinnedObject(), m_handRotationsPtr.AddrOfPinnedObject()))
+                    {
+                        // Update pickup joints
+                    }
+                }
+
+
 
                 if (m_sdk3)
                 {
@@ -167,6 +175,13 @@ namespace ml_lme
                             Transform l_rootTransform = GetRootTransform(ref l_solver);
                             l_solver.leftArm.target.position = l_rootTransform.position + l_rootTransform.rotation * l_newPos;
                             l_solver.leftArm.target.rotation = l_rootTransform.rotation * l_newRot;
+
+                            //var l_pickupJoint = VRCPlayer.field_Internal_Static_VRCPlayer_0?.field_Private_VRC_AnimationController_0?.field_Private_IkController_0?.field_Private_VRCHandGrasper_0?.field_Private_GameObject_0;
+                            //if(l_pickupJoint != null)
+                            //{
+                            //    l_pickupJoint.transform.position = l_solver.leftArm.target.position;
+                            //    l_pickupJoint.transform.rotation = l_solver.leftArm.target.rotation;
+                            //}
                         }
                     }
 
@@ -184,6 +199,13 @@ namespace ml_lme
                             Transform l_rootTransform = GetRootTransform(ref l_solver);
                             l_solver.rightArm.target.position = l_rootTransform.position + l_rootTransform.rotation * l_newPos;
                             l_solver.rightArm.target.rotation = l_rootTransform.rotation * l_newRot;
+
+                            //var l_pickupJoint = VRCPlayer.field_Internal_Static_VRCPlayer_0?.field_Private_VRC_AnimationController_0?.field_Private_IkController_0?.field_Private_VRCHandGrasper_1?.field_Private_GameObject_0;
+                            //if (l_pickupJoint != null)
+                            //{
+                            //    l_pickupJoint.transform.position = l_solver.rightArm.target.position;
+                            //    l_pickupJoint.transform.rotation = l_solver.rightArm.target.rotation;
+                            //}
                         }
                     }
                 }
@@ -243,7 +265,7 @@ namespace ml_lme
             }
 
             // Easy way to scale, but can be improved (?)
-            var l_height = VRCTrackingManager.Method_Public_Static_Single_6();
+            var l_height = VRCTrackingManager.Method_Public_Static_Single_7();
             pos += m_rootOffset;
             if (m_rootPoint == 0)
             {
@@ -253,7 +275,7 @@ namespace ml_lme
                     pos.z -= m_rootOffset.z;
                 }
                 pos *= l_height;
-                pos.y -= (l_height - VRCTrackingManager.Method_Public_Static_Single_4());
+                pos.y -= (l_height - VRCTrackingManager.Method_Public_Static_Single_5());
             }
             else
             {
