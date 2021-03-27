@@ -8,6 +8,8 @@ This mod allows you to use your Leap Motion controller for hands and fingers vis
 * Extract archive to VRChat folder.
 
 # Usage
+**Note:** Be sure to disable gestures in "Action Menu (R) - Options - Gestures" to make avatar animation actions be in fixed state instead of on hold state.
+
 Available settings im mods settings menu:
 * **Enable Leap Motion extension:** enable/disable extension.
 * **Enable HMD mode for Leap Motion:** force HMD mode for Leap Motion controller.
@@ -28,6 +30,7 @@ Available settings im mods settings menu:
     * 1 - Right hand
 * **Root point:** transformation root for hands position: 0 - player itself, 1 - player's head.
 * **RootOffsetY/RootOffsetZ:** transformation root offset. Values are representing offset for avatar with height 1.0. After applied offsets transformation scales based on current avatar height.
+* **FingersOnly:** apply only fingers tracking.
 
 # Notes
 Usage of mods breaks ToS of VRChat and can lead to ban. Use at your own risk.
