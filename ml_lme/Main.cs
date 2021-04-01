@@ -312,7 +312,7 @@ namespace ml_lme
             }
 
             // Easy way to scale, but can be improved (?)
-            var l_height = VRCTrackingManager.Method_Public_Static_Single_7();
+            var l_height = VRCTrackingManager.Method_Public_Static_Single_5();
             pos += m_rootOffset;
             if(m_rootPoint == 0)
             {
@@ -322,7 +322,7 @@ namespace ml_lme
                     pos.z -= m_rootOffset.z;
                 }
                 pos *= l_height;
-                pos.y -= (l_height - VRCTrackingManager.Method_Public_Static_Single_5());
+                pos.y -= (l_height - VRCTrackingManager.Method_Public_Static_Single_6());
             }
             else
             {
