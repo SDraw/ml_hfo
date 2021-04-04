@@ -4,13 +4,15 @@ This mod allows you to use your Leap Motion controller for hands and fingers vis
 [![](.github/img_01.png)](https://youtu.be/ALDBcI9yCyM)
 
 # Installation
+* Install [MelonLoader 0.3.0-ALPHA](https://github.com/LavaGang/MelonLoader).
+* (Optional, but recommended) Install [UIExpansionKit](https://github.com/knah/VRCMods).
 * Get [latest release](../../releases/latest).
 * Extract archive to VRChat folder.
 
 # Usage
 **Note:** Be sure to disable gestures in "Action Menu (R) - Options - Gestures" to make avatar animation actions be in fixed state instead of on hold state.
 
-Available settings im mods settings menu:
+Available settings in mods settings menu (or MelonLoader configuration file):
 * **Enable Leap Motion extension:** enable/disable extension.
 * **Enable HMD mode for Leap Motion:** force HMD mode for Leap Motion controller.
 * **Send SDK3 parameters:** send Avatars 3.0 parameters. This is useful fallback for VR mode usage because there is no found way to override fingers states with active VR controllers on remote players side. In this case avatar has to have specific parameters:
@@ -28,7 +30,7 @@ Available settings im mods settings menu:
   * `_HandPresent(0-1)`: boolean value, represents detection of hand. Indexes are:
     * 0 - Left hand
     * 1 - Right hand
-* **Root point:** transformation root for hands position: 0 - player itself, 1 - player's head.
+* **Head root:** use player's head as root transformation point.
 * **RootOffsetY/RootOffsetZ:** transformation root offset. Values are representing offset for avatar with height 1.0. After applied offsets transformation scales based on current avatar height.
 * **FingersOnly:** apply only fingers tracking.
 

@@ -28,7 +28,7 @@ namespace ml_lme
         bool m_enabled = false;
         bool m_sdk3 = false;
         bool m_vr = false;
-        int m_rootPoint = 0; // 0 - player, 1 - head
+        bool m_useHeadRoot = false;
         Vector3 m_rootOffset = new Vector3(0f, c_defaultRootOffsetY, c_defaultRootOffsetZ); // Default offset for avatar with height 1.0
         bool m_fingersOnly = false;
 
@@ -53,7 +53,7 @@ namespace ml_lme
             MelonLoader.MelonPreferences.CreateEntry("LME", "Enabled", false, "Enable Leap Motion extension");
             MelonLoader.MelonPreferences.CreateEntry("LME", "VR", false, "Enable HMD mode for Leap Motion");
             MelonLoader.MelonPreferences.CreateEntry("LME", "SDK3", false, "Send SDK3 parameters");
-            MelonLoader.MelonPreferences.CreateEntry("LME", "RootPoint", 0, "Root point (0 - player, 1 - head)");
+            MelonLoader.MelonPreferences.CreateEntry("LME", "HeadRoot", false, "Use head as root point");
             MelonLoader.MelonPreferences.CreateEntry("LME", "RootOffsetY", c_defaultRootOffsetY, "Avatar root point offset for Y axis");
             MelonLoader.MelonPreferences.CreateEntry("LME", "RootOffsetZ", c_defaultRootOffsetZ, "Avatar root point offset for Z axis");
             MelonLoader.MelonPreferences.CreateEntry("LME", "FingersOnly", false, "Fingers tracking only");
@@ -99,7 +99,7 @@ namespace ml_lme
             m_enabled = MelonLoader.MelonPreferences.GetEntryValue<bool>("LME", "Enabled");
             m_sdk3 = MelonLoader.MelonPreferences.GetEntryValue<bool>("LME", "SDK3");
             m_vr = MelonLoader.MelonPreferences.GetEntryValue<bool>("LME", "VR");
-            m_rootPoint = Mathf.Clamp(MelonLoader.MelonPreferences.GetEntryValue<int>("LME", "RootPoint"), 0, 1);
+            m_useHeadRoot = MelonLoader.MelonPreferences.GetEntryValue<bool>("LME", "HeadRoot");
             m_rootOffset.y = MelonLoader.MelonPreferences.GetEntryValue<float>("LME", "RootOffsetY");
             m_rootOffset.z = MelonLoader.MelonPreferences.GetEntryValue<float>("LME", "RootOffsetZ");
             m_fingersOnly = MelonLoader.MelonPreferences.GetEntryValue<bool>("LME", "FingersOnly");
@@ -314,7 +314,7 @@ namespace ml_lme
             // Easy way to scale, but can be improved (?)
             var l_height = VRCTrackingManager.Method_Public_Static_Single_5();
             pos += m_rootOffset;
-            if(m_rootPoint == 0)
+            if(!m_useHeadRoot)
             {
                 if(m_vr)
                 {
@@ -336,18 +336,15 @@ namespace ml_lme
         Transform GetRootTransform(ref RootMotion.FinalIK.IKSolverVR solver)
         {
             Transform l_result = null;
-            switch(m_rootPoint)
+            if(!m_useHeadRoot)
             {
-                case 0:
+                l_result = VRCPlayer.field_Internal_Static_VRCPlayer_0.transform;
+            }
+            else
+            {
+                l_result = solver.spine?.headTarget?.transform?.parent;
+                if(l_result == null)
                     l_result = VRCPlayer.field_Internal_Static_VRCPlayer_0.transform;
-                    break;
-                case 1:
-                {
-                    l_result = solver.spine?.headTarget?.transform?.parent;
-                    if(l_result == null)
-                        l_result = VRCPlayer.field_Internal_Static_VRCPlayer_0.transform;
-                }
-                break;
             }
             return l_result;
         }
