@@ -71,7 +71,7 @@ void CLeapPoller::Terminate()
         }
         m_interpolatedFrameBuffer.clear();
         m_device = nullptr;
-        
+
         delete m_lastFrame;
         m_lastFrame = nullptr;
         delete m_newFrame;

@@ -25,7 +25,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\bin\Mods\</OutputPath>
+    <OutputPath>bin\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -93,11 +93,22 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DependenciesHandler.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\vendor\LeapC\lib\x64\LeapC.dll">
+      <Link>LeapC.dll</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\leap_extender\bin\LeapExtender.dll">
+      <Link>LeapExtender.dll</Link>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /y "$(TargetPath)" "C:\Games\Steam\steamapps\common\VRChat\Mods\"</PostBuildEvent>
+    <PostBuildEvent>copy /y "$(TargetPath)" "F:\Games\Steam\steamapps\common\VRChat\Mods\"</PostBuildEvent>
   </PropertyGroup>
 </Project>

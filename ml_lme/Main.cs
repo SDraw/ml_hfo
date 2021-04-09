@@ -49,6 +49,9 @@ namespace ml_lme
 
         public override void OnApplicationStart()
         {
+            DependenciesHandler.ExtractDependencies();
+            // DependenciesHandler.LoadDependencies(); // DllImport above load them fine somehow
+
             MelonLoader.MelonPreferences.CreateCategory("LME", "Leap Motion extension");
             MelonLoader.MelonPreferences.CreateEntry("LME", "Enabled", false, "Enable Leap Motion extension");
             MelonLoader.MelonPreferences.CreateEntry("LME", "VR", false, "Enable HMD mode for Leap Motion");
@@ -112,8 +115,7 @@ namespace ml_lme
             if(m_enabled)
             {
                 // Use Leap Motion data
-                if(m_leapInitialized)
-                    LeapExtender.LeapGetHandsData(m_fingersDataPtr.AddrOfPinnedObject(), m_handsPresentPtr.AddrOfPinnedObject(), m_handPositionsPtr.AddrOfPinnedObject(), m_handRotationsPtr.AddrOfPinnedObject());
+                if(m_leapInitialized) LeapExtender.LeapGetHandsData(m_fingersDataPtr.AddrOfPinnedObject(), m_handsPresentPtr.AddrOfPinnedObject(), m_handPositionsPtr.AddrOfPinnedObject(), m_handRotationsPtr.AddrOfPinnedObject());
 
                 if(m_sdk3)
                 {
@@ -132,7 +134,7 @@ namespace ml_lme
                                 {
                                     if((l_bufferIndex >= 0) && (l_bufferIndex <= 9))
                                     {
-                                        l_playableController.Method_Public_Boolean_Int32_Single_1(i, m_fingersData[l_bufferIndex]); // Why the fuck float for all types???
+                                        l_playableController.Method_Public_Boolean_Int32_Single_1(i, m_fingersData[l_bufferIndex]);
                                     }
                                 }
                                 continue;
@@ -144,7 +146,7 @@ namespace ml_lme
                                 {
                                     if((l_bufferIndex >= 0) && (l_bufferIndex <= 1))
                                     {
-                                        l_playableController.Method_Public_Boolean_Int32_Single_1(i, m_handsPresent[l_bufferIndex] ? 1.0f : 0.0f); // Why the fuck float for all types???
+                                        l_playableController.Method_Public_Boolean_Int32_Single_1(i, m_handsPresent[l_bufferIndex] ? 1.0f : 0.0f); // Fallback
                                     }
                                 }
                                 continue;
@@ -311,7 +313,7 @@ namespace ml_lme
                 rot = c_hmdRotationFix * rot;
             }
 
-            // Easy way to scale, but can be improved (?)
+            // Easy way to scale, but can be improved (but how?)
             var l_height = VRCTrackingManager.Method_Public_Static_Single_5();
             pos += m_rootOffset;
             if(!m_useHeadRoot)

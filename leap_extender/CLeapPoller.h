@@ -36,5 +36,3 @@ public:
     void Update();
     void UpdateInterpolation();
 };
-
-

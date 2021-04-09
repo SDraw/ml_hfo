@@ -6,8 +6,8 @@ This mod allows you to use your Leap Motion controller for hands and fingers vis
 # Installation
 * Install [MelonLoader 0.3.0-ALPHA](https://github.com/LavaGang/MelonLoader).
 * (Optional, but recommended) Install [UIExpansionKit](https://github.com/knah/VRCMods).
-* Get [latest release](../../releases/latest).
-* Extract archive to VRChat folder.
+* Get [latest release DLL](../../releases/latest).
+* Put `ml_lme.dll` in `Mods` folder of game.
 
 # Usage
 **Note:** Be sure to disable gestures in "Action Menu (R) - Options - Gestures" to make avatar animation actions be in fixed state instead of on hold state.

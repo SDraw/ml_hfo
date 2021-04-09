@@ -47,7 +47,8 @@ extern "C" __declspec(dllexport) bool LeapGetHandsData(float *f_fingers, bool *f
             LEAP_HAND *l_hands[2U] = { nullptr };
             for(size_t i = 0U; i < l_frame->nHands; i++)
             {
-                if(!l_hands[l_frame->pHands[i].type]) l_hands[l_frame->pHands[i].type] = &l_frame->pHands[i];
+                const size_t l_handType = l_frame->pHands[i].type;
+                if(!l_hands[l_handType]) l_hands[l_handType] = &l_frame->pHands[i];
             }
 
             for(size_t i = 0U; i < 2U; i++)
@@ -58,18 +59,18 @@ extern "C" __declspec(dllexport) bool LeapGetHandsData(float *f_fingers, bool *f
                     CGestureMatcher::GetFingersStretches(l_hands[i], l_stretches);
                     for(size_t j = 0U; j < 5U; j++) f_fingers[i * 5 + j] = l_stretches[j];
 
-					const LEAP_VECTOR &l_position = l_hands[i]->palm.position;
-					f_positions[i*3] = l_position.x;
-					f_positions[i * 3+1] = l_position.y;
-					f_positions[i * 3+2] = l_position.z;
+                    const LEAP_VECTOR &l_position = l_hands[i]->palm.position;
+                    f_positions[i * 3] = l_position.x;
+                    f_positions[i * 3 + 1] = l_position.y;
+                    f_positions[i * 3 + 2] = l_position.z;
 
-					const LEAP_QUATERNION &l_rotation = l_hands[i]->palm.orientation;
-					f_rotations[i * 4] = l_rotation.x;
+                    const LEAP_QUATERNION &l_rotation = l_hands[i]->palm.orientation;
+                    f_rotations[i * 4] = l_rotation.x;
                     f_rotations[i * 4 + 1] = l_rotation.y;
                     f_rotations[i * 4 + 2] = l_rotation.z;
                     f_rotations[i * 4 + 3] = l_rotation.w;
 
-					f_hands[i] = true;
+                    f_hands[i] = true;
                 }
             }
         }
