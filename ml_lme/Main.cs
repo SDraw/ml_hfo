@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
@@ -25,7 +26,7 @@ namespace ml_lme
         const float c_defaultRootOffsetZ = 0.25f;
         readonly Quaternion c_hmdRotationFix = new Quaternion(0f, 0.7071068f, 0.7071068f, 0f);
 
-        bool m_enabled = false;
+        static bool ms_enabled = false;
         bool m_sdk3 = false;
         bool m_vr = false;
         bool m_useHeadRoot = false;
@@ -73,6 +74,12 @@ namespace ml_lme
             m_handRotations = new float[8];
             m_handRotationsPtr = GCHandle.Alloc(m_handRotations, GCHandleType.Pinned);
 
+            // Patches
+            var l_patchMethod = new Harmony.HarmonyMethod(typeof(LeapMotionExtention), "VRCIM_ControllersType");
+            typeof(VRCInputManager).GetMethods().Where(x =>
+                    x.Name.StartsWith("Method_Public_Static_Boolean_EnumNPublicSealedvaKeMoCoGaViOcViDaWaUnique_")
+                ).ToList().ForEach(m => Harmony.Patch(m, l_patchMethod));
+
             OnPreferencesSaved();
         }
 
@@ -99,7 +106,7 @@ namespace ml_lme
 
         public override void OnPreferencesSaved()
         {
-            m_enabled = MelonLoader.MelonPreferences.GetEntryValue<bool>("LME", "Enabled");
+            ms_enabled = MelonLoader.MelonPreferences.GetEntryValue<bool>("LME", "Enabled");
             m_sdk3 = MelonLoader.MelonPreferences.GetEntryValue<bool>("LME", "SDK3");
             m_vr = MelonLoader.MelonPreferences.GetEntryValue<bool>("LME", "VR");
             m_useHeadRoot = MelonLoader.MelonPreferences.GetEntryValue<bool>("LME", "HeadRoot");
@@ -112,10 +119,11 @@ namespace ml_lme
 
         public override void OnUpdate()
         {
-            if(m_enabled)
+            if(ms_enabled)
             {
                 // Use Leap Motion data
-                if(m_leapInitialized) LeapExtender.LeapGetHandsData(m_fingersDataPtr.AddrOfPinnedObject(), m_handsPresentPtr.AddrOfPinnedObject(), m_handPositionsPtr.AddrOfPinnedObject(), m_handRotationsPtr.AddrOfPinnedObject());
+                if(m_leapInitialized)
+                    LeapExtender.LeapGetHandsData(m_fingersDataPtr.AddrOfPinnedObject(), m_handsPresentPtr.AddrOfPinnedObject(), m_handPositionsPtr.AddrOfPinnedObject(), m_handRotationsPtr.AddrOfPinnedObject());
 
                 if(m_sdk3)
                 {
@@ -227,7 +235,7 @@ namespace ml_lme
 
         public override void OnLateUpdate()
         {
-            if(m_enabled)
+            if(ms_enabled)
             {
                 if(!m_fingersOnly)
                 {
@@ -280,7 +288,7 @@ namespace ml_lme
 
         void UpdateExtensionStates()
         {
-            if(m_enabled)
+            if(ms_enabled)
             {
                 if(!m_leapInitialized)
                     m_leapInitialized = LeapExtender.LeapInitialize();
@@ -349,6 +357,25 @@ namespace ml_lme
                     l_result = VRCPlayer.field_Internal_Static_VRCPlayer_0.transform;
             }
             return l_result;
+        }
+
+        static bool VRCIM_ControllersType(ref bool __result, VRCInputManager.EnumNPublicSealedvaKeMoCoGaViOcViDaWaUnique __0)
+        {
+            if(ms_enabled)
+            {
+                if(__0 == VRCInputManager.EnumNPublicSealedvaKeMoCoGaViOcViDaWaUnique.Index)
+                {
+                    __result = true;
+                    return false;
+                }
+                else
+                {
+                    __result = false;
+                    return false;
+                }
+            }
+            else
+                return true;
         }
 
         public static void Swap<T>(ref T lhs, ref T rhs)
