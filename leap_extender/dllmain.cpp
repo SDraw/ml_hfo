@@ -33,12 +33,21 @@ extern "C" __declspec(dllexport) bool LeapTerminate()
     return (g_leapPoller != nullptr);
 }
 
-extern "C" __declspec(dllexport) bool LeapGetHandsData(float *f_fingers, bool *f_hands, float *f_positions, float *f_rotations) // Array of 10 floats, array of 2 booleans, array of 6 floats, array of 8 floats
+// f_fingersBends - array of 10 floats
+// f_fingersSpreads - array of 10 floats
+// f_handsDetection - array of 2 booleans
+// f_handsPositions - array of 6 floats
+// f_handsRotations - array of 8 floats
+extern "C" __declspec(dllexport) bool LeapGetHandsData(float *f_fingersBends, float *f_fingersSpreads, bool *f_handsDetection, float *f_handsPositions, float *f_handsRotations)
 {
     if(g_leapPoller)
     {
-        for(size_t i = 0U; i < 10U; i++) f_fingers[i] = 0.f;
-        for(size_t i = 0U; i < 2U; i++) f_hands[i] = false;
+        for(size_t i = 0U; i < 10U; i++)
+        {
+            f_fingersBends[i] = 0.f;
+            f_fingersSpreads[i] = 0.f;
+        }
+        for(size_t i = 0U; i < 2U; i++) f_handsDetection[i] = false;
 
         g_leapPoller->Update();
         const LEAP_TRACKING_EVENT *l_frame = g_leapPoller->GetFrame();
@@ -55,22 +64,27 @@ extern "C" __declspec(dllexport) bool LeapGetHandsData(float *f_fingers, bool *f
             {
                 if(l_hands[i])
                 {
-                    std::vector<float> l_stretches;
-                    CGestureMatcher::GetFingersStretches(l_hands[i], l_stretches);
-                    for(size_t j = 0U; j < 5U; j++) f_fingers[i * 5 + j] = l_stretches[j];
+                    std::vector<float> l_bends;
+                    std::vector<float> l_spreads;
+                    CGestureMatcher::GetFingersStretches(l_hands[i], l_bends, l_spreads);
+                    for(size_t j = 0U; j < 5U; j++)
+                    {
+                        f_fingersBends[i * 5 + j] = l_bends[j];
+                        f_fingersSpreads[i * 5 + j] = l_spreads[j];
+                    }
 
                     const LEAP_VECTOR &l_position = l_hands[i]->palm.position;
-                    f_positions[i * 3] = l_position.x;
-                    f_positions[i * 3 + 1] = l_position.y;
-                    f_positions[i * 3 + 2] = l_position.z;
+                    f_handsPositions[i * 3] = l_position.x;
+                    f_handsPositions[i * 3 + 1] = l_position.y;
+                    f_handsPositions[i * 3 + 2] = l_position.z;
 
                     const LEAP_QUATERNION &l_rotation = l_hands[i]->palm.orientation;
-                    f_rotations[i * 4] = l_rotation.x;
-                    f_rotations[i * 4 + 1] = l_rotation.y;
-                    f_rotations[i * 4 + 2] = l_rotation.z;
-                    f_rotations[i * 4 + 3] = l_rotation.w;
+                    f_handsRotations[i * 4] = l_rotation.x;
+                    f_handsRotations[i * 4 + 1] = l_rotation.y;
+                    f_handsRotations[i * 4 + 2] = l_rotation.z;
+                    f_handsRotations[i * 4 + 3] = l_rotation.w;
 
-                    f_hands[i] = true;
+                    f_handsDetection[i] = true;
                 }
             }
         }

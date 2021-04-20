@@ -14,7 +14,7 @@ namespace ml_lme
         public static extern bool LeapTerminate();
 
         [DllImport("LeapExtender.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool LeapGetHandsData(IntPtr f_fingers, IntPtr f_handsPresent, IntPtr f_positions, IntPtr f_rotations);
+        public static extern bool LeapGetHandsData(IntPtr f_fingersBends, IntPtr f_fingersSpreads, IntPtr f_handsDetection, IntPtr f_handsPositions, IntPtr f_handsRotations);
 
         [DllImport("LeapExtender.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void LeapSetTrackingMode(int f_mode);
@@ -33,9 +33,12 @@ namespace ml_lme
         Vector3 m_rootOffset = new Vector3(0f, c_defaultRootOffsetY, c_defaultRootOffsetZ); // Default offset for avatar with height 1.0
         bool m_fingersOnly = false;
 
+        static bool ms_inVrMode = false;
         bool m_leapInitialized = false;
-        float[] m_fingersData = null;
-        GCHandle m_fingersDataPtr;
+        float[] m_fingersBends = null;
+        GCHandle m_fingersBendsPtr;
+        float[] m_fingersSpreads = null;
+        GCHandle m_fingersSpreadsPtr;
         bool[] m_handsPresent = null;
         GCHandle m_handsPresentPtr;
         float[] m_handPositions = null;
@@ -62,8 +65,13 @@ namespace ml_lme
             MelonLoader.MelonPreferences.CreateEntry("LME", "RootOffsetZ", c_defaultRootOffsetZ, "Avatar root point offset for Z axis");
             MelonLoader.MelonPreferences.CreateEntry("LME", "FingersOnly", false, "Fingers tracking only");
 
-            m_fingersData = new float[10];
-            m_fingersDataPtr = GCHandle.Alloc(m_fingersData, GCHandleType.Pinned);
+            ms_inVrMode = VRCTrackingManager.Method_Public_Static_Boolean_5();
+
+            m_fingersBends = new float[10];
+            m_fingersBendsPtr = GCHandle.Alloc(m_fingersBends, GCHandleType.Pinned);
+
+            m_fingersSpreads = new float[10];
+            m_fingersSpreadsPtr = GCHandle.Alloc(m_fingersSpreads, GCHandleType.Pinned);
 
             m_handsPresent = new bool[2];
             m_handsPresentPtr = GCHandle.Alloc(m_handsPresent, GCHandleType.Pinned);
@@ -85,8 +93,17 @@ namespace ml_lme
 
         public override void OnApplicationQuit()
         {
-            m_fingersDataPtr.Free();
-            m_fingersData = null;
+            if(m_leapInitialized)
+            {
+                LeapExtender.LeapTerminate();
+                m_leapInitialized = false;
+            }
+
+            m_fingersBendsPtr.Free();
+            m_fingersBends = null;
+
+            m_fingersSpreadsPtr.Free();
+            m_fingersSpreads = null;
 
             m_handsPresentPtr.Free();
             m_handsPresent = null;
@@ -96,12 +113,6 @@ namespace ml_lme
 
             m_handRotationsPtr.Free();
             m_handRotations = null;
-
-            if(m_leapInitialized)
-            {
-                LeapExtender.LeapTerminate();
-                m_leapInitialized = false;
-            }
         }
 
         public override void OnPreferencesSaved()
@@ -119,11 +130,14 @@ namespace ml_lme
 
         public override void OnUpdate()
         {
+            // Check for VR mode to prevent desktop input lock
+            ms_inVrMode = VRCTrackingManager.Method_Public_Static_Boolean_7();
+
             if(ms_enabled)
             {
                 // Use Leap Motion data
                 if(m_leapInitialized)
-                    LeapExtender.LeapGetHandsData(m_fingersDataPtr.AddrOfPinnedObject(), m_handsPresentPtr.AddrOfPinnedObject(), m_handPositionsPtr.AddrOfPinnedObject(), m_handRotationsPtr.AddrOfPinnedObject());
+                    LeapExtender.LeapGetHandsData(m_fingersBendsPtr.AddrOfPinnedObject(), m_fingersSpreadsPtr.AddrOfPinnedObject(), m_handsPresentPtr.AddrOfPinnedObject(), m_handPositionsPtr.AddrOfPinnedObject(), m_handRotationsPtr.AddrOfPinnedObject());
 
                 if(m_sdk3)
                 {
@@ -142,7 +156,7 @@ namespace ml_lme
                                 {
                                     if((l_bufferIndex >= 0) && (l_bufferIndex <= 9))
                                     {
-                                        l_playableController.Method_Public_Boolean_Int32_Single_1(i, m_fingersData[l_bufferIndex]);
+                                        l_playableController.Method_Public_Boolean_Int32_Single_1(i, m_fingersBends[l_bufferIndex]);
                                     }
                                 }
                                 continue;
@@ -224,8 +238,9 @@ namespace ml_lme
                         {
                             for(int j = 0; j < 5; j++)
                             {
-                                l_handController.field_Private_ArrayOf_VRCInput_0[i * 5 + j].field_Public_Single_0 = 1.0f - m_fingersData[i * 5 + j]; // Squeeze
-                                //l_handGestureController.field_Private_ArrayOf_VRCInput_1[i].field_Public_Single_0 = 1.0f - m_fingersData[i]; // Spread
+                                int l_dataIndex = i * 5 + j;
+                                l_handController.field_Private_ArrayOf_VRCInput_0[l_dataIndex].field_Public_Single_0 = 1.0f - m_fingersBends[l_dataIndex]; // Squeeze
+                                l_handController.field_Private_ArrayOf_VRCInput_1[l_dataIndex].field_Public_Single_0 = m_fingersSpreads[l_dataIndex]; // Spread
                             }
                         }
                     }
@@ -277,8 +292,9 @@ namespace ml_lme
                         {
                             for(int j = 0; j < 5; j++)
                             {
-                                l_handController.field_Private_ArrayOf_Single_1[i * 5 + j] = 1.0f - m_fingersData[i * 5 + j]; // Squeeze
-                                //l_handGestureController.field_Private_ArrayOf_Single_3[i] = 1.0f - m_fingersData[i]; // Spread
+                                int l_dataIndex = i * 5 + j;
+                                l_handController.field_Private_ArrayOf_Single_1[l_dataIndex] = 1.0f - m_fingersBends[l_dataIndex]; // Squeeze
+                                l_handController.field_Private_ArrayOf_Single_3[l_dataIndex] = m_fingersSpreads[l_dataIndex]; // Spread
                             }
                         }
                     }
@@ -322,7 +338,7 @@ namespace ml_lme
             }
 
             // Easy way to scale, but can be improved (but how?)
-            var l_height = VRCTrackingManager.Method_Public_Static_Single_5();
+            var l_height = VRCTrackingManager.Method_Public_Static_Single_0();
             pos += m_rootOffset;
             if(!m_useHeadRoot)
             {
@@ -332,7 +348,7 @@ namespace ml_lme
                     pos.z -= m_rootOffset.z;
                 }
                 pos *= l_height;
-                pos.y -= (l_height - VRCTrackingManager.Method_Public_Static_Single_6());
+                pos.y -= (l_height - VRCTrackingManager.Method_Public_Static_Single_4());
             }
             else
             {
@@ -361,7 +377,7 @@ namespace ml_lme
 
         static bool VRCIM_ControllersType(ref bool __result, VRCInputManager.EnumNPublicSealedvaKeMoCoGaViOcViDaWaUnique __0)
         {
-            if(ms_enabled)
+            if(ms_enabled && ms_inVrMode)
             {
                 if(__0 == VRCInputManager.EnumNPublicSealedvaKeMoCoGaViOcViDaWaUnique.Index)
                 {
