@@ -15,6 +15,7 @@ CLeapPoller::CLeapPoller()
     m_lastFrame = nullptr;
     m_newFrame = nullptr;
     m_device = nullptr;
+    m_threadTick = 0U;
 }
 
 CLeapPoller::~CLeapPoller()
@@ -54,7 +55,11 @@ void CLeapPoller::Terminate()
     if(m_active)
     {
         m_active = false;
-        m_thread->join();
+
+        // If LM controller isn't connected and LeapService is running,
+        // LeapPollConnection locks thread and ignores timeout argument value.
+        if(GetTickCount64() - m_threadTick > 1U) TerminateThread(m_thread->native_handle(), 0); // Kill without joining to prevent main thread lock
+        else m_thread->join();
         m_thread = nullptr;
 
         if(m_device) LeapCloseDevice(m_device);
@@ -172,6 +177,8 @@ void CLeapPoller::ThreadUpdate()
                     m_frameLock.unlock();
                 } break;
             }
+
+            m_threadTick = GetTickCount64();
         }
 
         std::this_thread::sleep_for(l_threadDelay);

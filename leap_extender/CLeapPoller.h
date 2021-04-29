@@ -14,6 +14,7 @@ class CLeapPoller
     std::vector<uint8_t> m_interpolatedFrameBuffer;
     LEAP_DEVICE m_device;
     bool m_connected;
+    std::atomic<ULONGLONG> m_threadTick;
 
     void ThreadUpdate();
 
