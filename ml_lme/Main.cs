@@ -338,7 +338,7 @@ namespace ml_lme
             }
 
             // Easy way to scale, but can be improved (but how?)
-            var l_height = VRCTrackingManager.Method_Public_Static_Single_5();
+            var l_height = VRCTrackingManager.Method_Public_Static_Single_8();
             pos += m_rootOffset;
             if(!m_useHeadRoot)
             {
