@@ -348,7 +348,7 @@ namespace ml_lme
                     pos.z -= m_rootOffset.z;
                 }
                 pos *= l_height;
-                pos.y -= (l_height - VRCTrackingManager.Method_Public_Static_Single_2());
+                pos.y -= (l_height - (ms_inVrMode ? VRCTrackingManager.Method_Public_Static_Single_PDM_2() : VRCTrackingManager.Method_Public_Static_Single_2()));
             }
             else
             {
