@@ -65,7 +65,7 @@ namespace ml_lme
             MelonLoader.MelonPreferences.CreateEntry("LME", "RootOffsetZ", c_defaultRootOffsetZ, "Avatar root point offset for Z axis");
             MelonLoader.MelonPreferences.CreateEntry("LME", "FingersOnly", false, "Fingers tracking only");
 
-            ms_inVrMode = VRCTrackingManager.Method_Public_Static_Boolean_5();
+            ms_inVrMode = VRCTrackingManager.Method_Public_Static_Boolean_4();
 
             m_fingersBends = new float[10];
             m_fingersBendsPtr = GCHandle.Alloc(m_fingersBends, GCHandleType.Pinned);
@@ -131,7 +131,7 @@ namespace ml_lme
         public override void OnUpdate()
         {
             // Check for VR mode to prevent desktop input lock
-            ms_inVrMode = VRCTrackingManager.Method_Public_Static_Boolean_7();
+            ms_inVrMode = VRCTrackingManager.Method_Public_Static_Boolean_4();
 
             if(ms_enabled)
             {
@@ -338,7 +338,7 @@ namespace ml_lme
             }
 
             // Easy way to scale, but can be improved (but how?)
-            var l_height = VRCTrackingManager.Method_Public_Static_Single_0();
+            var l_height = VRCTrackingManager.Method_Public_Static_Single_5();
             pos += m_rootOffset;
             if(!m_useHeadRoot)
             {
@@ -348,7 +348,7 @@ namespace ml_lme
                     pos.z -= m_rootOffset.z;
                 }
                 pos *= l_height;
-                pos.y -= (l_height - VRCTrackingManager.Method_Public_Static_Single_4());
+                pos.y -= (l_height - VRCTrackingManager.Method_Public_Static_Single_2());
             }
             else
             {
