@@ -156,7 +156,7 @@ namespace ml_lme
                                 {
                                     if((l_bufferIndex >= 0) && (l_bufferIndex <= 9))
                                     {
-                                        l_playableController.Method_Public_Boolean_Int32_Single_1(i, m_fingersBends[l_bufferIndex]);
+                                        l_playableController.Method_Public_Boolean_Int32_Single_0(i, m_fingersBends[l_bufferIndex]);
                                     }
                                 }
                                 continue;
@@ -168,7 +168,7 @@ namespace ml_lme
                                 {
                                     if((l_bufferIndex >= 0) && (l_bufferIndex <= 1))
                                     {
-                                        l_playableController.Method_Public_Boolean_Int32_Single_1(i, m_handsPresent[l_bufferIndex] ? 1.0f : 0.0f); // Fallback
+                                        l_playableController.Method_Public_Boolean_Int32_Single_0(i, m_handsPresent[l_bufferIndex] ? 1.0f : 0.0f); // Fallback, there is separated method for boolean parameters somewhere
                                     }
                                 }
                                 continue;
@@ -338,7 +338,7 @@ namespace ml_lme
             }
 
             // Easy way to scale, but can be improved (but how?)
-            var l_height = VRCTrackingManager.Method_Public_Static_Single_8();
+            var l_height = VRCTrackingManager.Method_Public_Static_Single_9();
             pos += m_rootOffset;
             if(!m_useHeadRoot)
             {
