@@ -1,4 +1,4 @@
-# Leap Motion Extension
+# Leap Motion Extension [![Discord](https://img.shields.io/discord/842350785635418123.svg?label=Discord&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/8XevATecpp)
 This mod allows you to use your Leap Motion controller for hands and fingers visual tracking.
 
 [![](.github/img_01.png)](https://youtu.be/ALDBcI9yCyM)
