@@ -4,8 +4,9 @@ This mod allows you to use your Leap Motion controller for hands and fingers vis
 [![](.github/img_01.png)](https://youtu.be/ALDBcI9yCyM)
 
 # Installation
+* Install [Orion (v4)](https://developer.leapmotion.com/sdk-leap-motion-controller) or [Gemini (v5)](https://developer.leapmotion.com/gemini-v5-preview).
 * Install [MelonLoader 0.3.0-ALPHA](https://github.com/LavaGang/MelonLoader).
-* (Optional, but recommended) Install [UIExpansionKit](https://github.com/knah/VRCMods).
+* Install [UIExpansionKit](https://github.com/knah/VRCMods) (highly recommended).
 * Get [latest release DLL](../../releases/latest).
 * Put `ml_lme.dll` in `Mods` folder of game.
 
