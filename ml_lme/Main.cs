@@ -65,8 +65,6 @@ namespace ml_lme
             MelonLoader.MelonPreferences.CreateEntry("LME", "RootOffsetZ", c_defaultRootOffsetZ, "Avatar root point offset for Z axis");
             MelonLoader.MelonPreferences.CreateEntry("LME", "FingersOnly", false, "Fingers tracking only");
 
-            ms_inVrMode = VRCTrackingManager.Method_Public_Static_Boolean_9();
-
             m_fingersBends = new float[10];
             m_fingersBendsPtr = GCHandle.Alloc(m_fingersBends, GCHandleType.Pinned);
 
@@ -131,7 +129,7 @@ namespace ml_lme
         public override void OnUpdate()
         {
             // Check for VR mode to prevent desktop input lock
-            ms_inVrMode = VRCTrackingManager.Method_Public_Static_Boolean_9();
+            ms_inVrMode = VRCTrackingManager.Method_Public_Static_Boolean_10();
 
             if(ms_enabled)
             {
