@@ -7,13 +7,10 @@ using System.Runtime.InteropServices;
 namespace ml_lme
 {
     class DependenciesHandler
-    {
-        [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Unicode)]
-        private static extern IntPtr LoadLibrary(string lpFileName);
-
+    { 
         static readonly List<string> ms_libraries = new List<string>()
         {
-            "LeapExtender.dll", "LeapC.dll"
+            "LeapC.dll"
         };
 
         public static void ExtractDependencies()
@@ -40,12 +37,6 @@ namespace ml_lme
                     }
                 }
             }
-        }
-
-        public static void LoadDependencies()
-        {
-            var l_result = LoadLibrary("LeapExtender.dll");
-            if(l_result == IntPtr.Zero) MelonLoader.MelonLogger.Error("Unable to load LeapExtender.dll");
         }
     }
 }

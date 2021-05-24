@@ -5,21 +5,6 @@ using UnityEngine;
 
 namespace ml_lme
 {
-    public static class LeapExtender
-    {
-        [DllImport("LeapExtender.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool LeapInitialize();
-
-        [DllImport("LeapExtender.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool LeapTerminate();
-
-        [DllImport("LeapExtender.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool LeapGetHandsData(IntPtr f_fingersBends, IntPtr f_fingersSpreads, IntPtr f_handsDetection, IntPtr f_handsPositions, IntPtr f_handsRotations);
-
-        [DllImport("LeapExtender.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void LeapSetTrackingMode(int f_mode);
-    }
-
     public class LeapMotionExtention : MelonLoader.MelonMod
     {
         const float c_defaultRootOffsetY = 0.5f;
@@ -34,17 +19,9 @@ namespace ml_lme
         bool m_fingersOnly = false;
 
         static bool ms_inVrMode = false;
-        bool m_leapInitialized = false;
-        float[] m_fingersBends = null;
-        GCHandle m_fingersBendsPtr;
-        float[] m_fingersSpreads = null;
-        GCHandle m_fingersSpreadsPtr;
-        bool[] m_handsPresent = null;
-        GCHandle m_handsPresentPtr;
-        float[] m_handPositions = null;
-        GCHandle m_handPositionsPtr;
-        float[] m_handRotations = null;
-        GCHandle m_handRotationsPtr;
+        bool m_leapActive = false;
+        Leap.Controller m_leapController = null;
+        GestureMatcher.GesturesData m_gesturesData = null;
 
         Vector3 m_leftTargetPosition;
         Quaternion m_leftTargetRotation;
@@ -54,7 +31,6 @@ namespace ml_lme
         public override void OnApplicationStart()
         {
             DependenciesHandler.ExtractDependencies();
-            // DependenciesHandler.LoadDependencies(); // DllImport above load them fine somehow
 
             MelonLoader.MelonPreferences.CreateCategory("LME", "Leap Motion extension");
             MelonLoader.MelonPreferences.CreateEntry("LME", "Enabled", false, "Enable Leap Motion extension");
@@ -65,20 +41,8 @@ namespace ml_lme
             MelonLoader.MelonPreferences.CreateEntry("LME", "RootOffsetZ", c_defaultRootOffsetZ, "Avatar root point offset for Z axis");
             MelonLoader.MelonPreferences.CreateEntry("LME", "FingersOnly", false, "Fingers tracking only");
 
-            m_fingersBends = new float[10];
-            m_fingersBendsPtr = GCHandle.Alloc(m_fingersBends, GCHandleType.Pinned);
-
-            m_fingersSpreads = new float[10];
-            m_fingersSpreadsPtr = GCHandle.Alloc(m_fingersSpreads, GCHandleType.Pinned);
-
-            m_handsPresent = new bool[2];
-            m_handsPresentPtr = GCHandle.Alloc(m_handsPresent, GCHandleType.Pinned);
-
-            m_handPositions = new float[6];
-            m_handPositionsPtr = GCHandle.Alloc(m_handPositions, GCHandleType.Pinned);
-
-            m_handRotations = new float[8];
-            m_handRotationsPtr = GCHandle.Alloc(m_handRotations, GCHandleType.Pinned);
+            m_leapController = new Leap.Controller();
+            m_gesturesData = new GestureMatcher.GesturesData();
 
             // Patches
             var l_patchMethod = new Harmony.HarmonyMethod(typeof(LeapMotionExtention), "VRCIM_ControllersType");
@@ -91,26 +55,11 @@ namespace ml_lme
 
         public override void OnApplicationQuit()
         {
-            if(m_leapInitialized)
+            if(m_leapActive)
             {
-                LeapExtender.LeapTerminate();
-                m_leapInitialized = false;
+                m_leapController.StopConnection();
+                m_leapController.Dispose();
             }
-
-            m_fingersBendsPtr.Free();
-            m_fingersBends = null;
-
-            m_fingersSpreadsPtr.Free();
-            m_fingersSpreads = null;
-
-            m_handsPresentPtr.Free();
-            m_handsPresent = null;
-
-            m_handPositionsPtr.Free();
-            m_handPositions = null;
-
-            m_handRotationsPtr.Free();
-            m_handRotations = null;
         }
 
         public override void OnPreferencesSaved()
@@ -134,8 +83,11 @@ namespace ml_lme
             if(ms_enabled)
             {
                 // Use Leap Motion data
-                if(m_leapInitialized)
-                    LeapExtender.LeapGetHandsData(m_fingersBendsPtr.AddrOfPinnedObject(), m_fingersSpreadsPtr.AddrOfPinnedObject(), m_handsPresentPtr.AddrOfPinnedObject(), m_handPositionsPtr.AddrOfPinnedObject(), m_handRotationsPtr.AddrOfPinnedObject());
+                if(m_leapActive && m_leapController.IsConnected)
+                {
+                    var l_frame = m_leapController.Frame();
+                    if(l_frame != null) GestureMatcher.GetGestures(ref l_frame, ref m_gesturesData);
+                }
 
                 if(m_sdk3)
                 {
@@ -147,18 +99,6 @@ namespace ml_lme
                         for(int i = 0; i < l_expParams.Length; i++)
                         {
                             var l_expParam = l_expParams[i];
-                            if(l_expParam.name.StartsWith("_FingerValue") && (l_expParam.valueType == VRC.SDK3.Avatars.ScriptableObjects.VRCExpressionParameters.ValueType.Float))
-                            {
-                                int l_bufferIndex = -1;
-                                if(Int32.TryParse(l_expParam.name.Substring(12), out l_bufferIndex))
-                                {
-                                    if((l_bufferIndex >= 0) && (l_bufferIndex <= 9))
-                                    {
-                                        l_playableController.Method_Public_Boolean_Int32_Single_0(i, m_fingersBends[l_bufferIndex]);
-                                    }
-                                }
-                                continue;
-                            }
                             if(l_expParam.name.StartsWith("_HandPresent") && (l_expParam.valueType == VRC.SDK3.Avatars.ScriptableObjects.VRCExpressionParameters.ValueType.Bool))
                             {
                                 int l_bufferIndex = -1;
@@ -166,7 +106,31 @@ namespace ml_lme
                                 {
                                     if((l_bufferIndex >= 0) && (l_bufferIndex <= 1))
                                     {
-                                        l_playableController.Method_Public_Boolean_Int32_Single_0(i, m_handsPresent[l_bufferIndex] ? 1.0f : 0.0f); // Fallback, there is separated method for boolean parameters somewhere
+                                        l_playableController.Method_Public_Boolean_Int32_Single_0(i, m_gesturesData.m_handsPresenses[l_bufferIndex] ? 1.0f : 0.0f); // Fallback, there is separated method for boolean parameters somewhere
+                                    }
+                                }
+                                continue;
+                            }
+                            if(l_expParam.name.StartsWith("_FingerBend") && (l_expParam.valueType == VRC.SDK3.Avatars.ScriptableObjects.VRCExpressionParameters.ValueType.Float))
+                            {
+                                int l_bufferIndex = -1;
+                                if(Int32.TryParse(l_expParam.name.Substring(11), out l_bufferIndex))
+                                {
+                                    if((l_bufferIndex >= 0) && (l_bufferIndex <= 9))
+                                    {
+                                        l_playableController.Method_Public_Boolean_Int32_Single_0(i, (i < 5) ? m_gesturesData.m_leftFingersBends[i] : m_gesturesData.m_rightFingersBends[i - 5]);
+                                    }
+                                }
+                                continue;
+                            }
+                            if(l_expParam.name.StartsWith("_FingerSpread") && (l_expParam.valueType == VRC.SDK3.Avatars.ScriptableObjects.VRCExpressionParameters.ValueType.Float))
+                            {
+                                int l_bufferIndex = -1;
+                                if(Int32.TryParse(l_expParam.name.Substring(13), out l_bufferIndex))
+                                {
+                                    if((l_bufferIndex >= 0) && (l_bufferIndex <= 9))
+                                    {
+                                        l_playableController.Method_Public_Boolean_Int32_Single_0(i, (i < 5) ? m_gesturesData.m_leftFingersSpreads[i] : m_gesturesData.m_rightFingersSpreads[i - 5]);
                                     }
                                 }
                                 continue;
@@ -180,12 +144,12 @@ namespace ml_lme
                     var l_solver = VRCPlayer.field_Internal_Static_VRCPlayer_0?.field_Private_VRC_AnimationController_0?.field_Private_VRIK_0?.solver;
                     if(l_solver != null)
                     {
-                        if(m_handsPresent[0])
+                        if(m_gesturesData.m_handsPresenses[0])
                         {
                             if(l_solver.leftArm?.target != null)
                             {
-                                Vector3 l_newPos = new Vector3(m_handPositions[0], m_handPositions[1], -m_handPositions[2]) * 0.001f;
-                                Quaternion l_newRot = new Quaternion(-m_handRotations[0], -m_handRotations[1], m_handRotations[2], m_handRotations[3]);
+                                Vector3 l_newPos = new Vector3(m_gesturesData.m_handsPositons[0].x, m_gesturesData.m_handsPositons[0].y, -m_gesturesData.m_handsPositons[0].z) * 0.001f;
+                                Quaternion l_newRot = new Quaternion(-m_gesturesData.m_handsRotations[0].x, -m_gesturesData.m_handsRotations[0].y, m_gesturesData.m_handsRotations[0].z, m_gesturesData.m_handsRotations[0].w);
                                 ApplyAdjustment(ref l_newPos, ref l_newRot);
 
                                 Transform l_rootTransform = GetRootTransform(ref l_solver);
@@ -201,12 +165,12 @@ namespace ml_lme
                             }
                         }
 
-                        if(m_handsPresent[1])
+                        if(m_gesturesData.m_handsPresenses[1])
                         {
                             if(l_solver.rightArm?.target != null)
                             {
-                                Vector3 l_newPos = new Vector3(m_handPositions[3], m_handPositions[4], -m_handPositions[5]) * 0.001f;
-                                Quaternion l_newRot = new Quaternion(-m_handRotations[4], -m_handRotations[5], m_handRotations[6], m_handRotations[7]);
+                                Vector3 l_newPos = new Vector3(m_gesturesData.m_handsPositons[1].x, m_gesturesData.m_handsPositons[1].y, -m_gesturesData.m_handsPositons[1].z) * 0.001f;
+                                Quaternion l_newRot = new Quaternion(-m_gesturesData.m_handsRotations[1].x, -m_gesturesData.m_handsRotations[1].y, m_gesturesData.m_handsRotations[1].z, m_gesturesData.m_handsRotations[1].w);
                                 ApplyAdjustment(ref l_newPos, ref l_newRot);
 
                                 Transform l_rootTransform = GetRootTransform(ref l_solver);
@@ -232,13 +196,13 @@ namespace ml_lme
 
                     for(int i = 0; i < 2; i++)
                     {
-                        if(m_handsPresent[i])
+                        if(m_gesturesData.m_handsPresenses[i])
                         {
                             for(int j = 0; j < 5; j++)
                             {
                                 int l_dataIndex = i * 5 + j;
-                                l_handController.field_Private_ArrayOf_VRCInput_0[l_dataIndex].field_Public_Single_0 = 1.0f - m_fingersBends[l_dataIndex]; // Squeeze
-                                l_handController.field_Private_ArrayOf_VRCInput_1[l_dataIndex].field_Public_Single_0 = m_fingersSpreads[l_dataIndex]; // Spread
+                                l_handController.field_Private_ArrayOf_VRCInput_0[l_dataIndex].field_Public_Single_0 = 1.0f - ((i == 0) ? m_gesturesData.m_leftFingersBends[j] : m_gesturesData.m_rightFingersBends[j]); // Squeeze
+                                l_handController.field_Private_ArrayOf_VRCInput_1[l_dataIndex].field_Public_Single_0 = ((i == 0) ? m_gesturesData.m_leftFingersSpreads[j] : m_gesturesData.m_rightFingersSpreads[j]); // Spread
                             }
                         }
                     }
@@ -255,7 +219,7 @@ namespace ml_lme
                     var l_solver = VRCPlayer.field_Internal_Static_VRCPlayer_0?.field_Private_VRC_AnimationController_0?.field_Private_VRIK_0?.solver;
                     if(l_solver != null)
                     {
-                        if(m_handsPresent[0])
+                        if(m_gesturesData.m_handsPresenses[0])
                         {
                             if(l_solver.leftArm?.target != null)
                             {
@@ -266,7 +230,7 @@ namespace ml_lme
                             }
                         }
 
-                        if(m_handsPresent[1])
+                        if(m_gesturesData.m_handsPresenses[1])
                         {
                             if(l_solver.rightArm?.target != null)
                             {
@@ -286,13 +250,13 @@ namespace ml_lme
                     l_handController.field_Private_EnumNPublicSealedvaKeMoCoGaViOcViDaWaUnique_0 = VRCInputManager.EnumNPublicSealedvaKeMoCoGaViOcViDaWaUnique.Index;
                     for(int i = 0; i < 2; i++)
                     {
-                        if(m_handsPresent[i])
+                        if(m_gesturesData.m_handsPresenses[i])
                         {
                             for(int j = 0; j < 5; j++)
                             {
                                 int l_dataIndex = i * 5 + j;
-                                l_handController.field_Private_ArrayOf_Single_1[l_dataIndex] = 1.0f - m_fingersBends[l_dataIndex]; // Squeeze
-                                l_handController.field_Private_ArrayOf_Single_3[l_dataIndex] = m_fingersSpreads[l_dataIndex]; // Spread
+                                l_handController.field_Private_ArrayOf_VRCInput_0[l_dataIndex].field_Public_Single_0 = 1.0f - ((i == 0) ? m_gesturesData.m_leftFingersBends[j] : m_gesturesData.m_rightFingersBends[j]); // Squeeze
+                                l_handController.field_Private_ArrayOf_VRCInput_1[l_dataIndex].field_Public_Single_0 = ((i == 0) ? m_gesturesData.m_leftFingersSpreads[j] : m_gesturesData.m_rightFingersSpreads[j]); // Spread
                             }
                         }
                     }
@@ -304,16 +268,22 @@ namespace ml_lme
         {
             if(ms_enabled)
             {
-                if(!m_leapInitialized)
-                    m_leapInitialized = LeapExtender.LeapInitialize();
-                LeapExtender.LeapSetTrackingMode(m_vr ? 1 : 0);
+                if(!m_leapActive)
+                {
+                    m_leapController.StartConnection();
+                    m_leapActive = true;
+                }
+                if(m_vr)
+                    m_leapController.SetPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD);
+                else
+                    m_leapController.ClearPolicy(Leap.Controller.PolicyFlag.POLICY_OPTIMIZE_HMD);
             }
             else
             {
-                if(m_leapInitialized)
+                if(m_leapActive)
                 {
-                    LeapExtender.LeapTerminate();
-                    m_leapInitialized = false;
+                    m_leapController.StopConnection();
+                    m_leapActive = false;
                 }
 
                 // Reset HandGestureController, IKSolverVR resets itself

@@ -17,7 +17,10 @@ Available settings in mods settings menu (or MelonLoader configuration file):
 * **Enable Leap Motion extension:** enable/disable extension.
 * **Enable HMD mode for Leap Motion:** force HMD mode for Leap Motion controller.
 * **Send SDK3 parameters:** send Avatars 3.0 parameters. In this case avatar has to have specific parameters:
-  * `_FingerValue(0-9)`: float value, represents value of finger squeeze in range of 0.0 to 1.0. Indexes are:
+  * `_HandPresent(0-1)`: boolean value, represents detection of hand. Indexes are:
+    * 0 - Left hand
+    * 1 - Right hand
+  * `_FingerBend(0-9)`: float value, represents value of finger bend in range of 0.0 to 1.0. Indexes are:
     * 0 - Left thumb
     * 1 - Left index
     * 2 - Left middle
@@ -28,9 +31,7 @@ Available settings in mods settings menu (or MelonLoader configuration file):
     * 7 - Right middle
     * 8 - Right ring
     * 9 - Right pinky
-  * `_HandPresent(0-1)`: boolean value, represents detection of hand. Indexes are:
-    * 0 - Left hand
-    * 1 - Right hand
+  * `_FingerSpread(0-9)`: float value, represents value of finger spread in range of 0.0 to 1.0. Indexes are same as for `_FingerBend(0-9)`.
 * **Head root:** use player's head as root transformation point.
 * **RootOffsetY/RootOffsetZ:** transformation root offset. Values are representing offset for avatar with height 1.0. After applied offsets transformation scales based on current avatar height.
 * **FingersOnly:** apply only fingers tracking. Useful for finger tracking with real VR controllers.

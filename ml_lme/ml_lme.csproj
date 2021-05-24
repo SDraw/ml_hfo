@@ -93,18 +93,110 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\vendor\LeapCSharp\Arm.cs">
+      <Link>LeapCSharp\Arm.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\Bone.cs">
+      <Link>LeapCSharp\Bone.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\CircularObjectBuffer.cs">
+      <Link>LeapCSharp\CircularObjectBuffer.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\Config.cs">
+      <Link>LeapCSharp\Config.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\Connection.cs">
+      <Link>LeapCSharp\Connection.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\Controller.cs">
+      <Link>LeapCSharp\Controller.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\CopyFromLeapCExtensions.cs">
+      <Link>LeapCSharp\CopyFromLeapCExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\CopyFromOtherExtensions.cs">
+      <Link>LeapCSharp\CopyFromOtherExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\CSharpExtensions.cs">
+      <Link>LeapCSharp\CSharpExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\Device.cs">
+      <Link>LeapCSharp\Device.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\DeviceList.cs">
+      <Link>LeapCSharp\DeviceList.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\DistortionData.cs">
+      <Link>LeapCSharp\DistortionData.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\Events.cs">
+      <Link>LeapCSharp\Events.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\FailedDevice.cs">
+      <Link>LeapCSharp\FailedDevice.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\FailedDeviceList.cs">
+      <Link>LeapCSharp\FailedDeviceList.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\Finger.cs">
+      <Link>LeapCSharp\Finger.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\Frame.cs">
+      <Link>LeapCSharp\Frame.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\Hand.cs">
+      <Link>LeapCSharp\Hand.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\IController.cs">
+      <Link>LeapCSharp\IController.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\Image.cs">
+      <Link>LeapCSharp\Image.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\ImageData.cs">
+      <Link>LeapCSharp\ImageData.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\LeapC.cs">
+      <Link>LeapCSharp\LeapC.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\LeapQuaternion.cs">
+      <Link>LeapCSharp\LeapQuaternion.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\LeapTransform.cs">
+      <Link>LeapCSharp\LeapTransform.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\Logger.cs">
+      <Link>LeapCSharp\Logger.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\Matrix.cs">
+      <Link>LeapCSharp\Matrix.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\MemoryManager.cs">
+      <Link>LeapCSharp\MemoryManager.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\MessageSeverity.cs">
+      <Link>LeapCSharp\MessageSeverity.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\PointMapping.cs">
+      <Link>LeapCSharp\PointMapping.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\StructMarshal.cs">
+      <Link>LeapCSharp\StructMarshal.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\TransformExtensions.cs">
+      <Link>LeapCSharp\TransformExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\vendor\LeapCSharp\Vector.cs">
+      <Link>LeapCSharp\Vector.cs</Link>
+    </Compile>
     <Compile Include="DependenciesHandler.cs" />
+    <Compile Include="GestureMatcher.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\vendor\LeapC\lib\x64\LeapC.dll">
       <Link>LeapC.dll</Link>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="..\leap_extender\bin\LeapExtender.dll">
-      <Link>LeapExtender.dll</Link>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
