@@ -31,13 +31,13 @@ Available settings in mods settings menu (or MelonLoader configuration file):
     * 7 - Right middle
     * 8 - Right ring
     * 9 - Right pinky
-  * `_FingerSpread(0-9)`: float value, represents value of finger spread in range of 0.0 to 1.0. Indexes are same as for `_FingerBend(0-9)`.
-* **Head root:** use player's head as root transformation point.
-* **RootOffsetY/RootOffsetZ:** transformation root offset. Values are representing offset for avatar with height 1.0. After applied offsets transformation scales based on current avatar height.
-* **FingersOnly:** apply only fingers tracking. Useful for finger tracking with real VR controllers.
+  * `_FingerSpread(0-9)`: float value, represents value of finger spread in range of -1.0 to 1.0. Indexes are same as for `_FingerBend(0-9)`.
+* **Use head as root point:** use player's head as root transformation point.
+* **Avatar root point offset for Y/Z axis:** transformation root offset values for Y (up) and Z (forward) axes. Values are representing offset for avatar with height 1.0. Offset values are scaled based on current avatar height.
+* **Fingers tracking only:** apply only fingers tracking. Useful for finger tracking with real VR controllers.
 
 # Notes
 Usage of mods breaks ToS of VRChat and can lead to ban. Use at your own risk.
 
 # Credits
-* Thanks to [Magic3000](https://github.com/Magic3000) for patch to enable finger tracking in VR mode.
+* Thanks to [Magic3000](https://github.com/Magic3000) for patch to enable remote finger tracking in VR mode.
