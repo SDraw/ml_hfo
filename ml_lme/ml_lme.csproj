@@ -192,6 +192,7 @@
     <Compile Include="DependenciesHandler.cs" />
     <Compile Include="GestureMatcher.cs" />
     <Compile Include="Main.cs" />
+    <Compile Include="MethodsResolver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

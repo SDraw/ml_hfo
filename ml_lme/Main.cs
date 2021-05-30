@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace ml_lme
@@ -28,6 +27,11 @@ namespace ml_lme
         Vector3 m_rightTargetPosition;
         Quaternion m_rightTargetRotation;
 
+        System.Reflection.MethodInfo m_heightMethod = null;
+        System.Reflection.MethodInfo m_eyeHeightMethod = null;
+        System.Reflection.MethodInfo m_vrEyeHeightMethod = null;
+        System.Reflection.MethodInfo m_vrCheckMethod = null;
+
         public override void OnApplicationStart()
         {
             DependenciesHandler.ExtractDependencies();
@@ -44,8 +48,45 @@ namespace ml_lme
             m_leapController = new Leap.Controller();
             m_gesturesData = new GestureMatcher.GesturesData();
 
+            // Methods search
+            m_heightMethod = MethodsResolver.GetHeightMethod();
+            if(m_heightMethod != null)
+                MelonLoader.MelonDebug.Msg("VRCTrackingManager." + m_heightMethod.Name + " -> VRCTrackingManager.GetPlayerHeight");
+            else
+            {
+                MelonLoader.MelonLogger.Warning("Can't resolve height method, fallback to zero float");
+                m_heightMethod = typeof(LeapMotionExtention).GetMethod(nameof(ZeroFloat));
+            }
+
+            m_eyeHeightMethod = MethodsResolver.GetEyeHeightMethod();
+            if(m_eyeHeightMethod != null)
+                MelonLoader.MelonDebug.Msg("VRCTrackingManager." + m_eyeHeightMethod.Name + " -> VRCTrackingManager.GetPlayerEyeHeight (Desktop)");
+            else
+            {
+                MelonLoader.MelonLogger.Warning("Can't resolve eye height method for desktop, fallback to zero float");
+                m_eyeHeightMethod = typeof(LeapMotionExtention).GetMethod(nameof(ZeroFloat));
+            }
+
+            m_vrEyeHeightMethod = MethodsResolver.GetVREyeHeightMethod();
+            if(m_vrEyeHeightMethod != null)
+                MelonLoader.MelonDebug.Msg("VRCTrackingManager." + m_vrEyeHeightMethod.Name + " -> VRCTrackingManager.GetPlayerEyeHeight (VR)");
+            else
+            {
+                MelonLoader.MelonLogger.Warning("Can't resolve eye height method for VR, fallback to zero float");
+                m_vrEyeHeightMethod = typeof(LeapMotionExtention).GetMethod(nameof(ZeroFloat));
+            }
+
+            m_vrCheckMethod = MethodsResolver.GetVRCheckMethod();
+            if(m_vrCheckMethod != null)
+                MelonLoader.MelonDebug.Msg("VRCTrackingManager." + m_vrCheckMethod.Name + " -> VRCTrackingManager.IsInVRMode");
+            else
+            {
+                MelonLoader.MelonLogger.Warning("Can't resolve vr check method, fallback to false boolean");
+                m_vrCheckMethod = typeof(LeapMotionExtention).GetMethod(nameof(FalseBoolean));
+            }
+
             // Patches
-            var l_patchMethod = new Harmony.HarmonyMethod(typeof(LeapMotionExtention), "VRCIM_ControllersType");
+            var l_patchMethod = new Harmony.HarmonyMethod(typeof(LeapMotionExtention), nameof(VRCIM_ControllersType));
             typeof(VRCInputManager).GetMethods().Where(x =>
                     x.Name.StartsWith("Method_Public_Static_Boolean_EnumNPublicSealedvaKeMoCoGaViOcViDaWaUnique_")
                 ).ToList().ForEach(m => Harmony.Patch(m, l_patchMethod));
@@ -56,10 +97,8 @@ namespace ml_lme
         public override void OnApplicationQuit()
         {
             if(m_leapActive)
-            {
                 m_leapController.StopConnection();
-                m_leapController.Dispose();
-            }
+            m_leapController.Dispose();
         }
 
         public override void OnPreferencesSaved()
@@ -78,7 +117,7 @@ namespace ml_lme
         public override void OnUpdate()
         {
             // Check for VR mode to prevent desktop input lock
-            ms_inVrMode = VRCTrackingManager.Method_Public_Static_Boolean_10();
+            ms_inVrMode = (bool)m_vrCheckMethod.Invoke(null,null);
 
             if(ms_enabled)
             {
@@ -86,7 +125,8 @@ namespace ml_lme
                 if(m_leapActive && m_leapController.IsConnected)
                 {
                     var l_frame = m_leapController.Frame();
-                    if(l_frame != null) GestureMatcher.GetGestures(ref l_frame, ref m_gesturesData);
+                    if(l_frame != null)
+                        GestureMatcher.GetGestures(ref l_frame, ref m_gesturesData);
                 }
 
                 if(m_sdk3)
@@ -306,7 +346,7 @@ namespace ml_lme
             }
 
             // Easy way to scale, but can be improved (but how?)
-            var l_height = VRCTrackingManager.Method_Public_Static_Single_5();
+            var l_height = (float)m_heightMethod.Invoke(null, null);
             pos += m_rootOffset;
             if(!m_useHeadRoot)
             {
@@ -316,7 +356,7 @@ namespace ml_lme
                     pos.z -= m_rootOffset.z;
                 }
                 pos *= l_height;
-                pos.y -= (l_height - (ms_inVrMode ? VRCTrackingManager.Method_Public_Static_Single_PDM_0() : VRCTrackingManager.Method_Public_Static_Single_4()));
+                pos.y -= (l_height - (float)(ms_inVrMode ? m_vrEyeHeightMethod.Invoke(null,null) : m_eyeHeightMethod.Invoke(null,null)));
             }
             else
             {
@@ -367,6 +407,16 @@ namespace ml_lme
             T temp = lhs;
             lhs = rhs;
             rhs = temp;
+        }
+
+        public static float ZeroFloat()
+        {
+            return 0f;
+        }
+
+        public static bool FalseBoolean()
+        {
+            return false;
         }
     }
 }
