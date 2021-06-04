@@ -33,7 +33,8 @@
         public static void GetGestures(ref Leap.Frame f_frame, ref GesturesData f_data)
         {
             // Fill as default
-            for(int i = 0; i < GesturesData.gc_handCount; i++) f_data.m_handsPresenses[i] = false;
+            for(int i = 0; i < GesturesData.gc_handCount; i++)
+                f_data.m_handsPresenses[i] = false;
             for(int i = 0; i < GesturesData.gc_fingersCount; i++)
             {
                 f_data.m_leftFingersBends[i] = 0f;
@@ -100,7 +101,8 @@
                         var l_leapDir = l_bone.NextJoint - l_bone.PrevJoint;
                         var l_dir = new UnityEngine.Vector3(l_leapDir.x, l_leapDir.y, l_leapDir.z);
                         l_dir.Normalize();
-                        if(i > l_startBoneID) f_bends[(int)l_finger.Type] += UnityEngine.Mathf.Acos(UnityEngine.Vector3.Dot(l_dir, l_prevDirection));
+                        if(i > l_startBoneID)
+                            f_bends[(int)l_finger.Type] += UnityEngine.Mathf.Acos(UnityEngine.Vector3.Dot(l_dir, l_prevDirection));
                         l_prevDirection = l_dir;
                     }
                 }
@@ -124,7 +126,8 @@
                     var l_dir = new UnityEngine.Vector3(l_leapDir.x, l_leapDir.y, l_leapDir.z);
                     l_dir.Normalize();
 
-                    if(l_finger.Type != Leap.Finger.FingerType.TYPE_THUMB) f_spreads[(int)l_finger.Type] = UnityEngine.Vector3.Dot(l_dir, l_sideDir) * 2f;
+                    if(l_finger.Type != Leap.Finger.FingerType.TYPE_THUMB)
+                        f_spreads[(int)l_finger.Type] = UnityEngine.Vector3.Dot(l_dir, l_sideDir) * 2f;
                     else
                     {
                         UnityEngine.Vector3 l_boneNext = new UnityEngine.Vector3(l_bone.NextJoint.x, l_bone.NextJoint.y, l_bone.NextJoint.z);
@@ -147,7 +150,8 @@
                             break;
                     }
 
-                    if(f_bends[(int)l_finger.Type] > 0.5f) f_spreads[(int)l_finger.Type] = UnityEngine.Mathf.Lerp(f_spreads[(int)l_finger.Type], 0f, (f_bends[(int)l_finger.Type] - 0.5f) * 2f);
+                    if(f_bends[(int)l_finger.Type] > 0.5f)
+                        f_spreads[(int)l_finger.Type] = UnityEngine.Mathf.Lerp(f_spreads[(int)l_finger.Type], 0f, (f_bends[(int)l_finger.Type] - 0.5f) * 2f);
                 }
             }
         }

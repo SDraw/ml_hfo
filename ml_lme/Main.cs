@@ -31,6 +31,7 @@ namespace ml_lme
         System.Reflection.MethodInfo m_eyeHeightMethod = null;
         System.Reflection.MethodInfo m_vrEyeHeightMethod = null;
         System.Reflection.MethodInfo m_vrCheckMethod = null;
+        System.Reflection.MethodInfo m_parametersMethod = null;
 
         public override void OnApplicationStart()
         {
@@ -85,6 +86,12 @@ namespace ml_lme
                 m_vrCheckMethod = typeof(LeapMotionExtention).GetMethod(nameof(FalseBoolean));
             }
 
+            m_parametersMethod = MethodsResolver.GetSDK3ParameterSetMethod();
+            if(m_parametersMethod != null)
+                MelonLoader.MelonDebug.Msg("AvatarPlayableController." + m_parametersMethod.Name + " -> AvatarPlayableController.SetAvatar<>Param");
+            else
+                MelonLoader.MelonLogger.Warning("Can't resolve avatar parameters set method, SDK3 avatar parameters set feature won't work");
+
             // Patches
             var l_patchMethod = new Harmony.HarmonyMethod(typeof(LeapMotionExtention), nameof(VRCIM_ControllersType));
             typeof(VRCInputManager).GetMethods().Where(x =>
@@ -117,7 +124,7 @@ namespace ml_lme
         public override void OnUpdate()
         {
             // Check for VR mode to prevent desktop input lock
-            ms_inVrMode = (bool)m_vrCheckMethod.Invoke(null,null);
+            ms_inVrMode = (bool)m_vrCheckMethod.Invoke(null, null);
 
             if(ms_enabled)
             {
@@ -129,7 +136,7 @@ namespace ml_lme
                         GestureMatcher.GetGestures(ref l_frame, ref m_gesturesData);
                 }
 
-                if(m_sdk3)
+                if(m_sdk3 && (m_parametersMethod != null))
                 {
                     // Set SDK3 parameters directly, user has to make own avatar with specific parameters
                     var l_expParams = VRCPlayer.field_Internal_Static_VRCPlayer_0?.prop_VRCAvatarManager_0?.prop_VRCAvatarDescriptor_0?.expressionParameters?.parameters;
@@ -146,7 +153,7 @@ namespace ml_lme
                                 {
                                     if((l_bufferIndex >= 0) && (l_bufferIndex <= 1))
                                     {
-                                        l_playableController.Method_Public_Boolean_Int32_Single_0(i, m_gesturesData.m_handsPresenses[l_bufferIndex] ? 1.0f : 0.0f); // Fallback, there is separated method for boolean parameters somewhere
+                                        m_parametersMethod.Invoke(l_playableController, new object[] { i, (m_gesturesData.m_handsPresenses[l_bufferIndex] ? 1.0f : 0.0f) });
                                     }
                                 }
                                 continue;
@@ -158,7 +165,7 @@ namespace ml_lme
                                 {
                                     if((l_bufferIndex >= 0) && (l_bufferIndex <= 9))
                                     {
-                                        l_playableController.Method_Public_Boolean_Int32_Single_0(i, (i < 5) ? m_gesturesData.m_leftFingersBends[i] : m_gesturesData.m_rightFingersBends[i - 5]);
+                                        m_parametersMethod.Invoke(l_playableController, new object[] { i, ((i < 5) ? m_gesturesData.m_leftFingersBends[i] : m_gesturesData.m_rightFingersBends[i - 5]) });
                                     }
                                 }
                                 continue;
@@ -170,7 +177,7 @@ namespace ml_lme
                                 {
                                     if((l_bufferIndex >= 0) && (l_bufferIndex <= 9))
                                     {
-                                        l_playableController.Method_Public_Boolean_Int32_Single_0(i, (i < 5) ? m_gesturesData.m_leftFingersSpreads[i] : m_gesturesData.m_rightFingersSpreads[i - 5]);
+                                        m_parametersMethod.Invoke(l_playableController, new object[] { i, (i < 5) ? m_gesturesData.m_leftFingersSpreads[i] : m_gesturesData.m_rightFingersSpreads[i - 5] });
                                     }
                                 }
                                 continue;
@@ -326,7 +333,7 @@ namespace ml_lme
                     m_leapActive = false;
                 }
 
-                // Reset HandGestureController, IKSolverVR resets itself
+                // Reset HandGestureController, IKSolverVR resets hand by itself
                 var l_controller = VRCPlayer.field_Internal_Static_VRCPlayer_0?.field_Private_VRC_AnimationController_0?.field_Private_HandGestureController_0;
                 if(l_controller != null)
                 {
@@ -356,7 +363,7 @@ namespace ml_lme
                     pos.z -= m_rootOffset.z;
                 }
                 pos *= l_height;
-                pos.y -= (l_height - (float)(ms_inVrMode ? m_vrEyeHeightMethod.Invoke(null,null) : m_eyeHeightMethod.Invoke(null,null)));
+                pos.y -= (l_height - (float)(ms_inVrMode ? m_vrEyeHeightMethod.Invoke(null, null) : m_eyeHeightMethod.Invoke(null, null)));
             }
             else
             {

@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Runtime.InteropServices;
 
 namespace ml_lme
 {
     class DependenciesHandler
-    { 
+    {
         static readonly List<string> ms_libraries = new List<string>()
         {
             "LeapC.dll"
