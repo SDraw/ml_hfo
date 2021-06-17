@@ -93,10 +93,10 @@ namespace ml_lme
                 MelonLoader.MelonLogger.Warning("Can't resolve avatar parameters set method, SDK3 avatar parameters set feature won't work");
 
             // Patches
-            var l_patchMethod = new Harmony.HarmonyMethod(typeof(LeapMotionExtention), nameof(VRCIM_ControllersType));
+            var l_patchMethod = new HarmonyLib.HarmonyMethod(typeof(LeapMotionExtention), nameof(VRCIM_ControllersType));
             typeof(VRCInputManager).GetMethods().Where(x =>
                     x.Name.StartsWith("Method_Public_Static_Boolean_EnumNPublicSealedvaKeMoCoGaViOcViDaWaUnique_")
-                ).ToList().ForEach(m => Harmony.Patch(m, l_patchMethod));
+                ).ToList().ForEach(m => HarmonyInstance.Patch(m, l_patchMethod));
 
             OnPreferencesSaved();
         }
