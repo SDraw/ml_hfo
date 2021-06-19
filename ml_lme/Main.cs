@@ -165,7 +165,7 @@ namespace ml_lme
                                 {
                                     if((l_bufferIndex >= 0) && (l_bufferIndex <= 9))
                                     {
-                                        m_parametersMethod.Invoke(l_playableController, new object[] { i, ((i < 5) ? m_gesturesData.m_leftFingersBends[i] : m_gesturesData.m_rightFingersBends[i - 5]) });
+                                        m_parametersMethod.Invoke(l_playableController, new object[] { i, ((l_bufferIndex < 5) ? m_gesturesData.m_leftFingersBends[l_bufferIndex] : m_gesturesData.m_rightFingersBends[l_bufferIndex - 5]) });
                                     }
                                 }
                                 continue;
@@ -177,7 +177,7 @@ namespace ml_lme
                                 {
                                     if((l_bufferIndex >= 0) && (l_bufferIndex <= 9))
                                     {
-                                        m_parametersMethod.Invoke(l_playableController, new object[] { i, (i < 5) ? m_gesturesData.m_leftFingersSpreads[i] : m_gesturesData.m_rightFingersSpreads[i - 5] });
+                                        m_parametersMethod.Invoke(l_playableController, new object[] { i, (l_bufferIndex < 5) ? m_gesturesData.m_leftFingersSpreads[l_bufferIndex] : m_gesturesData.m_rightFingersSpreads[l_bufferIndex - 5] });
                                     }
                                 }
                                 continue;
