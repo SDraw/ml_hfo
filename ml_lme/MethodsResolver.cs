@@ -72,8 +72,7 @@ namespace ml_lme
 
             var l_methodsList = typeof(AvatarPlayableController).GetMethods()
                 .Where(m => m.Name.StartsWith("Method_Public_Boolean_Int32_Single_") && m.ReturnType == typeof(bool) && m.GetParameters().Count() == 2 && UnhollowerRuntimeLib.XrefScans.XrefScanner.UsedBy(m)
-                .Where(x => x.Type == UnhollowerRuntimeLib.XrefScans.XrefType.Method && x.TryResolve()?.DeclaringType == typeof(ActionMenu)).Count() == 0 && UnhollowerRuntimeLib.XrefScans.XrefScanner.XrefScan(m)
-                .Where(x => x.Type == UnhollowerRuntimeLib.XrefScans.XrefType.Method && x.TryResolve()?.DeclaringType == typeof(Numerics)).Count() > 0);
+                .Where(x => x.Type == UnhollowerRuntimeLib.XrefScans.XrefType.Method && x.TryResolve()?.DeclaringType == typeof(ActionMenu)).Count() == 0);
 
             if(l_methodsList.Count() != 0)
                 l_result = l_methodsList.First();
