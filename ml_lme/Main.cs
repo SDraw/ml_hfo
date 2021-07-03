@@ -9,12 +9,14 @@ namespace ml_lme
         const float c_defaultRootOffsetY = 0.5f;
         const float c_defaultRootOffsetZ = 0.25f;
         readonly Quaternion c_hmdRotationFix = new Quaternion(0f, 0.7071068f, 0.7071068f, 0f);
+        const float c_defaultHmdOffsetY = 0f;
 
         static bool ms_enabled = false;
         bool m_sdk3 = false;
         bool m_vr = false;
         bool m_useHeadRoot = false;
         Vector3 m_rootOffset = new Vector3(0f, c_defaultRootOffsetY, c_defaultRootOffsetZ); // Default offset for avatar with height 1.0
+        float m_hmdOffsetY = c_defaultHmdOffsetY;
         bool m_fingersOnly = false;
 
         static bool ms_inVrMode = false;
@@ -42,6 +44,7 @@ namespace ml_lme
             MelonLoader.MelonPreferences.CreateEntry("LME", "VR", false, "Enable HMD mode for Leap Motion");
             MelonLoader.MelonPreferences.CreateEntry("LME", "SDK3", false, "Send SDK3 parameters");
             MelonLoader.MelonPreferences.CreateEntry("LME", "HeadRoot", false, "Use head as root point");
+            MelonLoader.MelonPreferences.CreateEntry("LME", "HmdOffsetY", c_defaultHmdOffsetY, "HMD offset for Y axis");
             MelonLoader.MelonPreferences.CreateEntry("LME", "RootOffsetY", c_defaultRootOffsetY, "Avatar root point offset for Y axis");
             MelonLoader.MelonPreferences.CreateEntry("LME", "RootOffsetZ", c_defaultRootOffsetZ, "Avatar root point offset for Z axis");
             MelonLoader.MelonPreferences.CreateEntry("LME", "FingersOnly", false, "Fingers tracking only");
@@ -114,6 +117,7 @@ namespace ml_lme
             m_sdk3 = MelonLoader.MelonPreferences.GetEntryValue<bool>("LME", "SDK3");
             m_vr = MelonLoader.MelonPreferences.GetEntryValue<bool>("LME", "VR");
             m_useHeadRoot = MelonLoader.MelonPreferences.GetEntryValue<bool>("LME", "HeadRoot");
+            m_hmdOffsetY = MelonLoader.MelonPreferences.GetEntryValue<float>("LME", "HmdOffsetY");
             m_rootOffset.y = MelonLoader.MelonPreferences.GetEntryValue<float>("LME", "RootOffsetY");
             m_rootOffset.z = MelonLoader.MelonPreferences.GetEntryValue<float>("LME", "RootOffsetZ");
             m_fingersOnly = MelonLoader.MelonPreferences.GetEntryValue<bool>("LME", "FingersOnly");
@@ -369,7 +373,10 @@ namespace ml_lme
             {
                 pos.y -= m_rootOffset.y * (m_vr ? 1f : 2f);
                 if(m_vr)
+                {
+                    pos.y += m_hmdOffsetY;
                     pos.z -= m_rootOffset.z * 2f;
+                }
                 pos *= l_height;
             }
         }
